@@ -1,0 +1,184 @@
+<html>
+
+<head>
+    <title>Project 2</title>
+    <link rel="stylesheet" type="text/css" href="project1.css"></link>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+
+<body>
+    <div id="Vis1">
+        <h1>Visualization 1: </h1>
+        <select id="gender">
+            <option value="0">Male</option>
+            <option value="1">Female</option>
+        </select>
+        <select id="x_factor">
+            <option value="0">SAT</option>
+            <option value="1">ACT Math</option>
+            <option value="2">HSGPA</option>
+        </select>
+        <div id="vis1_plot">
+        </div>
+    </div>
+    <script>
+    vis1(0, 0)
+    var xfactor_select = document.getElementById("x_factor");
+    var gender_select = document.getElementById("gender");
+    xfactor_select.addEventListener("change", function(d) {
+        // add an event listener to trigger the polt changes
+        vis1(xfactor_select.value, gender_select.value)
+    });
+    gender_select.addEventListener("change", function(d) {
+        // add an event listener to trigger the polt changes
+        vis1(xfactor_select.value, gender_select.value)
+    });
+
+    function vis1(xfactor, gender) {
+        var div = document.getElementById('vis1_plot');
+        while (div.firstChild) {
+            div.removeChild(div.firstChild);
+        }
+        var fields = [
+            ['Enroll, Male: Avg. SAT Math Score (Enrl M)', 'Enroll, Male: Avg. ACT Math Score (Enrl M)', 'Enroll, Male: Average HS GPA (Enrl M)'],
+            ['Enroll, Female: Avg. SAT Math Score (Enrl F)', 'Enroll, Female: Avg. ACT Math Score (Enrl F)', 'Enroll, Female: Average HS GPA (Enrl F)']
+        ];
+        var gpas = ['Freshmen, Male: Cumulative GPA (Fshm M)', 'Freshmen, Female: Cumulative GPA (Fshm F)'];
+        var margin = { top: 20, right: 20, bottom: 30, left: 40 },
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        var xValue = function(d) { return parseFloat(d[fields[gender][xfactor]]); }, // data -> value
+            xScale = d3.scaleLinear().range([0, width]);
+
+        // setup y
+        var yValue = function(d) { return parseFloat(d[gpas[gender]]); }, // data -> value
+            yScale = d3.scaleLinear().range([height, 0]);
+
+        var svg = d3.select("#vis1_plot").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+        var data_files = ["/data/anscombe_I.csv", "/data/anscombe_II.csv", "/data/anscombe_III.csv", "/data/anscombe_IV.csv"];
+
+        //load proper data file based on the selection
+        d3.csv("/data/ACT_SAT_HS_FreshmenGPA.csv", function(data) {
+
+            var xmax = d3.max(data, function(d) { return parseFloat(d[fields[gender][xfactor]]); });
+            var xmin = d3.min(data, function(d) { return parseFloat(d[fields[gender][xfactor]]); });
+            var ymax = d3.max(data, function(d) { return parseFloat(d[gpas[gender]]); });
+            var ymin = d3.min(data, function(d) { return parseFloat(d[gpas[gender]]); });
+
+            xScale.domain([xmin, xmax]);
+            yScale.domain([ymin, ymax]);
+
+            data.sort(function(a, b) { return a[fields[gender][xfactor]] - b[fields[gender][xfactor]] });
+
+
+            var tooltip = d3.select("#vis1_plot").append("div").attr("id", "toolTip");
+            tooltip.style("position", "relative").style("height", "auto").style("font-size", "14");
+
+            // draw dots
+            svg.selectAll(".dot")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("class", "dot")
+                .attr("r", 3.5)
+                .attr("cx", function(d) { return xScale(d[fields[gender][xfactor]]); })
+                .attr("cy", function(d) { return yScale(d[gpas[gender]]); })
+                .on("mouseover", function(d) {
+                    //change dot color when mouse hove over 
+                    var dot = d3.select(this);
+                    dot.style('fill', 'red')
+                        .attr('r', 4);
+
+                    //show tooltip
+                    d3.select("#tooltip")
+                        .style("left", d3.mouse(this)[0] - width)
+                        .style("top", d3.mouse(this)[1] - height)
+                        .style("display", "inline-block")
+                        .text("(" + d[fields[gender][xfactor]] + "," + d[gpas[gender]] + ")");
+
+
+                })
+                .on("mouseout", function(d) {
+                    //change back the color
+                    var dot = d3.select(this);
+                    dot.style('fill', 'black')
+                        .attr('r', 3.5);
+                    //hide tooltip
+                    d3.select("#tooltip").style("display", "none");
+                });
+
+            //draw x-axis
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xScale));
+            //x-axis label
+            svg.append("text")
+                .attr("class", "label")
+                .text(xfactor_select.options[xfactor_select.selectedIndex].text)
+                .attr("x", width)
+                .attr("y", height - 5);
+
+            //draw y-axis
+            svg.append("g")
+                .call(d3.axisLeft(yScale));
+            //y-axis label
+            svg.append("text")
+                .attr("class", "label")
+                .text("GPA")
+                .attr("x", 5)
+                .attr("y", -5);
+
+
+
+            var x = data.map(function(d) { return parseFloat(d[fields[gender][xfactor]]); });
+            var y = data.map(function(d) { return parseFloat(d[gpas[gender]]); });
+
+            var lr = linearRegression(x, y);
+
+            var xmax = d3.max(data, function(d) { return parseFloat(d[fields[gender][xfactor]]); });
+            var xmin = d3.min(data, function(d) { return parseFloat(d[fields[gender][xfactor]]); });
+            var ymax = d3.max(data, function(d) { return parseFloat(d[gpas[gender]]); });
+            var ymin = d3.min(data, function(d) { return parseFloat(d[gpas[gender]]); });
+
+            svg.append("line")
+                .attr("x1", xScale(0))
+                .attr("y1", yScale(lr.intercept))
+                .attr("x2", xScale(xmax))
+                .attr("y2", yScale((xmax * lr.slope) + lr.intercept))
+                .style("stroke", "blue");
+
+
+            //var lg = calcLinear(data, fields[gender][xfactor], gpas[gender], d3.min(data, function(d) { return parseFloat(d[fields[gender][xfactor]]) }), d3.min(data, function(d) { return parseFloat(d[gpas[gender]]) }));
+
+        });
+    }
+
+    function linearRegression(x, y) {
+        var lr = {};
+        var n = y.length;
+        var r = 0;
+        var rpart;
+        var xmean = d3.mean(x, function(d) { return d; });
+        var ymean = d3.mean(y, function(d) { return d; });
+        var xstd = d3.deviation(x, function(d) { return d; });
+        var ystd = d3.deviation(y, function(d) { return d; });
+        for (var i = 0; i < y.length; i++) {
+            rpart = (x[i] - xmean) * (y[i] - ymean) / xstd / ystd;
+            var r = r + rpart;
+        }
+        var r1 = r / (y.length - 1)
+        lr['slope'] = r1 * (ystd / xstd);
+        lr['intercept'] = ymean - lr.slope * xmean;
+
+        return lr;
+    };
+    </script>
+</body>
+
+</html>
