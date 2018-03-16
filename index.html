@@ -53,6 +53,13 @@
             <h2>Average Retention</h2>
             <div id="vis3_plot">
             </div>
+            <div id="vis3_detail">
+                <center>
+                    <button id="back_btn" type="button" class="btn btn-default">Back</button>
+                </center>
+                <div id="vis3_detail_plot">
+                </div>
+            </div>
         </div>
         <script>
         //Vis1
@@ -367,10 +374,20 @@
 
         };
 
-
+        document.getElementById("back_btn")
+            .addEventListener("click", function(d) {
+                $("#vis3_detail").fadeOut(500);
+                vis3();
+                $("#vis3_plot").fadeIn(500);
+            });
         vis3();
+        $("#vis3_detail").hide();
 
         function vis3() {
+            var div = document.getElementById('vis3_plot');
+            while (div.firstChild) {
+                div.removeChild(div.firstChild);
+            }
             var margin = { top: 20, right: 20, bottom: 30, left: 60 },
                 width = 960 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
@@ -406,8 +423,8 @@
                     var index = yearDict[d["School Year"]];
 
                     yearCount[index]++;
-                    maleRate[index] += (parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) + 1) / (parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) + parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) + 1);
-                    femaleRate[index] += (parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) + 1) / (parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) + parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) + 1);
+                    maleRate[index] += (parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) + 0.000001) / (parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) + parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) + 0.000001);
+                    femaleRate[index] += (parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) + 0.000001) / (parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) + parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) + 0.000001);
                 });
                 var tooltip3 = d3.select("#vis3_plot").append("div").attr("id", "toolTip_vis3");
                 tooltip3.style("position", "relative").style("height", "auto").style("font-size", "14");
@@ -492,6 +509,13 @@
                         tooltip3.style("display", "none");
 
 
+                    })
+                    .on("click", function(d) {
+                        //change back the color
+                        $("#vis3_plot").fadeOut(500);
+                        vis3_detail(d.year, "male", d.maleRate);
+                        return;
+
                     });
 
                 var line = d3.line()
@@ -544,6 +568,13 @@
                         tooltip3.style("display", "none");
 
 
+                    })
+                    .on("click", function(d) {
+                        //change back the color
+                        $("#vis3_plot").fadeOut(500);
+                        vis3_detail(d.year, "female", d.maleRate);
+                        return;
+
                     });
 
 
@@ -589,9 +620,20 @@
             });
 
         };
-        vis3_detail();
-
+        document.getElementById("back_btn")
+            .addEventListener("click", function(d) {
+                $("vis3_detail").fadeOut(500);
+                vis3();
+                $("vis3_plot").fadeIn(500);
+            });
+        //vis3_detail();
         function vis3_detail(year, sex, rate) {
+
+            var div = document.getElementById('vis3_detail_plot');
+            while (div.firstChild) {
+                div.removeChild(div.firstChild);
+            }
+
             var margin = { top: 20, right: 20, bottom: 30, left: 60 },
                 width = 960 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
@@ -625,30 +667,79 @@
                     sophomoresRates = new Array(4).fill(0),
                     otherRates = new Array(4).fill(0);
                 data.forEach(function(d) {
-                    if (d.year != year)
+                    if (d["School Year"] != year)
                         return;
                     var index = declareDict[d["When do students typically declare their major?"]];
                     count[index]++;
-                    freshmenRates[index] += (parseFloat(d[fields[gender][3]]) + 1) / (parseFloat(d[fields[gender][2]]) + parseFloat(d[fields[gender][3]]) + 1);
-                    sophomoresRates[index] += (parseFloat(d[fields[gender][5]]) + 1) / (parseFloat(d[fields[gender][4]]) + parseFloat(d[fields[gender][5]]) + 1);
-                    otherRates[index] += (parseFloat(d[fields[gender][1]]) - parseFloat(d[fields[gender][3]]) - parseFloat(d[fields[gender][5]]) + 1) /
-                        (parseFloat(d[fields[gender][1]]) + parseFloat(d[fields[gender][0]]) - (parseFloat(d[fields[gender][2]]) + parseFloat(d[fields[gender][3]])) - (parseFloat(d[fields[gender][4]]) + parseFloat(d[fields[gender][5]])) + 1);
+                    freshmenRates[index] += (parseFloat(d[fields[gender][3]]) + 0.000001) / (parseFloat(d[fields[gender][2]]) + parseFloat(d[fields[gender][3]]) + 0.000001);
+                    sophomoresRates[index] += (parseFloat(d[fields[gender][5]]) + 0.000001) / (parseFloat(d[fields[gender][4]]) + parseFloat(d[fields[gender][5]]) + 0.000001);
+                    otherRates[index] += (parseFloat(d[fields[gender][1]]) - parseFloat(d[fields[gender][3]]) - parseFloat(d[fields[gender][5]]) + 0.000001) /
+                        (parseFloat(d[fields[gender][1]]) + parseFloat(d[fields[gender][0]]) - (parseFloat(d[fields[gender][2]]) + parseFloat(d[fields[gender][3]])) - (parseFloat(d[fields[gender][4]]) + parseFloat(d[fields[gender][5]])) + 0.000001);
                 });
                 var showData = [];
                 for (i = 0; i < 4; i++) {
                     showData.push({
                         "label": declarFields[i],
-                        "totalRetention": rate,
-                        "freshmenRetention": freshmenRates[i],
-                        "sophomoresRates": sophomoresRates[i],
-                        "otherRates": otherRates[i]
+                        "totalRetention": rate, // TODO
+                        "freshmenRetention": freshmenRates[i] / count[i],
+                        "sophomoresRates": sophomoresRates[i] / count[i],
+                        "otherRates": otherRates[i] / count[i]
                     });
 
                 }
                 console.log(showData);
+                var margin = { top: 20, right: 20, bottom: 30, left: 60 },
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
 
+                var svg = d3.select("#vis3_detail_plot").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var x0 = d3.scaleBand()
+                    .rangeRound([0, width])
+                    .paddingInner(0.1);
+
+                var x1 = d3.scaleBand()
+                    .padding(0.05);
+
+                var y = d3.scaleLinear()
+                    .rangeRound([height, 0]);
+
+                var z = d3.scaleOrdinal()
+                    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+                var keys = ["totalRetention", "freshmenRetention", "sophomoresRates", "otherRates"];
+
+                x0.domain(showData.map(function(d) { return d.label; }));
+                x1.domain(keys).rangeRound([0, x0.bandwidth()]);
+                y.domain([0.5, 1.0]);
+
+                svg.append("g")
+                    .selectAll("g")
+                    .data(showData)
+                    .enter().append("g")
+                    .attr("transform", function(d) { return "translate(" + x0(d.label) + ",0)"; })
+                    .selectAll("rect")
+                    .data(function(d) { return keys.map(function(key) { return { key: key, value: d[key] }; }); })
+                    .enter().append("rect")
+                    .attr("x", function(d) { return x1(d.key); })
+                    .attr("y", function(d) { return y(d.value); })
+                    .attr("width", x1.bandwidth())
+                    .attr("height", function(d) { return height - y(d.value); })
+                    .attr("fill", function(d) { return z(d.key); });
+
+                svg.append("g")
+                    .call(d3.axisBottom(x0))
+                    .attr("transform", "translate(0," + y(0.5) + ")");
+
+                svg.append("g")
+                    .call(d3.axisLeft(y));
             });
 
+            $("#vis3_detail").fadeIn(1000);
 
 
         };
