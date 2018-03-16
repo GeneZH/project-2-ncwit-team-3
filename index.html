@@ -116,6 +116,7 @@
 
             var tooltip = d3.select("#vis1_plot").append("div")
                 .attr("id", "toolTip");
+
             tooltip.style("position", "relative")
                 .style("height", "auto")
                 .style("font-size", "14")
@@ -370,24 +371,28 @@
 
                 svg.append("g")
                     .call(d3.axisLeft(y));
+
+                svg.append("text")
+                    .attr("class", "label")
+                    .text("Female GPA - Male GPA")
+                    .attr("x", 5)
+                    .attr("y", -5);
             });
 
         };
 
+
+        vis3();
+        $("#vis3_detail").hide();
         document.getElementById("back_btn")
             .addEventListener("click", function(d) {
                 $("#vis3_detail").fadeOut(500);
                 vis3();
                 $("#vis3_plot").fadeIn(500);
             });
-        vis3();
-        $("#vis3_detail").hide();
 
         function vis3() {
-            var div = document.getElementById('vis3_plot');
-            while (div.firstChild) {
-                div.removeChild(div.firstChild);
-            }
+            $("#vis3_plot").html("");
             var margin = { top: 20, right: 20, bottom: 30, left: 60 },
                 width = 960 - margin.left - margin.right,
                 height = 500 - margin.top - margin.bottom;
@@ -426,8 +431,19 @@
                     maleRate[index] += (parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) + 0.000001) / (parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) + parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) + 0.000001);
                     femaleRate[index] += (parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) + 0.000001) / (parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) + parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) + 0.000001);
                 });
+                if ($('#toolTip_vis3').length) {
+                    document.getElementById("toolTip_vis3").outerHTML = '';
+                }
                 var tooltip3 = d3.select("#vis3_plot").append("div").attr("id", "toolTip_vis3");
-                tooltip3.style("position", "relative").style("height", "auto").style("font-size", "14");
+                tooltip3.style("position", "relative")
+                    .style("height", "auto")
+                    .style("font-size", "14")
+                    .style("background", "lightsteelblue")
+                    .style("padding", "5px")
+                    .style("border-radius", "8px")
+                    .style("opacity", 0);
+
+
 
                 var showData = []
                 for (i = 0; i < 13; i++) {
@@ -496,6 +512,7 @@
                         tooltip3.style("left", d3.mouse(this)[0] - width)
                             .style("top", d3.mouse(this)[1] - height)
                             .style("display", "inline-block")
+                            .style("opacity", .9)
                             .text('' + d.maleRate);
 
 
@@ -514,7 +531,6 @@
                         //change back the color
                         $("#vis3_plot").fadeOut(500);
                         vis3_detail(d.year, "male", d.maleRate);
-                        return;
 
                     });
 
@@ -555,6 +571,7 @@
                         tooltip3.style("left", d3.mouse(this)[0] - width)
                             .style("top", d3.mouse(this)[1] - height)
                             .style("display", "inline-block")
+                            .style("opacity", .9)
                             .text('' + d.femaleRate);
 
 
@@ -572,8 +589,8 @@
                     .on("click", function(d) {
                         //change back the color
                         $("#vis3_plot").fadeOut(500);
+
                         vis3_detail(d.year, "female", d.maleRate);
-                        return;
 
                     });
 
@@ -596,11 +613,17 @@
                 svg.append("g")
                     .call(d3.axisLeft(y));
 
+                svg.append("text")
+                    .attr("class", "label")
+                    .text("Retention Ratio")
+                    .attr("x", 5)
+                    .attr("y", -5);
+
                 var ordinal = d3.scaleOrdinal()
                     .domain(["Male", "Female"])
                     .range(["steelblue", "orange"]);
 
-
+                //legend
                 svg.append("g")
                     .attr("class", "legendOrdinal")
                     .attr("transform", "translate(20,20)");
@@ -614,6 +637,7 @@
 
                 svg.select(".legendOrdinal")
                     .call(legendOrdinal);
+
 
 
 
@@ -709,7 +733,7 @@
                     .rangeRound([height, 0]);
 
                 var z = d3.scaleOrdinal()
-                    .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+                    .range(["#F16A70", "#B1D877", "#8CDCDA", "#4D4D4D"]);
 
                 var keys = ["totalRetention", "freshmenRetention", "sophomoresRates", "otherRates"];
 
@@ -737,6 +761,31 @@
 
                 svg.append("g")
                     .call(d3.axisLeft(y));
+
+                svg.append("text")
+                    .attr("class", "label")
+                    .text("Retention Ratio")
+                    .attr("x", 5)
+                    .attr("y", -5);
+
+                var ordinal = d3.scaleOrdinal()
+                    .domain(["Total", "Freshmen", "Sophomores", "Other"])
+                    .range(["#F16A70", "#B1D877", "#8CDCDA", "#4D4D4D"]);
+
+                //legend
+                svg.append("g")
+                    .attr("class", "legendOrdinal")
+                    .attr("transform", "translate(20,20)");
+
+                var legendOrdinal = d3.legendColor()
+                    .shape("path", d3.symbol().type(d3.symbolSquare).size(150)())
+                    .shapePadding(10)
+                    //use cellFilter to hide the "e" cell
+                    .cellFilter(function(d) { return d.label !== "e" })
+                    .scale(ordinal);
+
+                svg.select(".legendOrdinal")
+                    .call(legendOrdinal);
             });
 
             $("#vis3_detail").fadeIn(1000);
