@@ -150,7 +150,7 @@
                     .style("opacity", .9)
                     .on("mouseover", function(d) {
                         //change dot color when mouse hove over
-                        var dot = d3.select(this);
+                        dot = d3.select(this);
                         dot.style("fill", "red")
                             .attr("r", 4);
 
@@ -503,27 +503,30 @@
                     .attr("cx", function(d) { return x(d.year) + 29.3; })
                     .attr("cy", function(d) { return y(d.maleRate); })
                     .on("mouseover", function(d) {
-                        //change dot color when mouse hove over
-                        var dot = d3.select(this);
-                        dot.style("fill", "red")
+                        //change dot color when      mouse hove over
+                        d3.select(this)
+                            .style("fill", "red")
                             .attr("r", 4.5);
-
                         //show tooltip
-                        tooltip3.style("left", d3.mouse(this)[0] - width)
+                        /*d3.select("#toolTip_vis3")
+                            .style("left", d3.mouse(this)[0] - width)
                             .style("top", d3.mouse(this)[1] - height)
                             .style("display", "inline-block")
                             .style("opacity", .9)
                             .text('' + d.maleRate);
+
+                        console.log("overman");*/
+
 
 
 
                     })
                     .on("mouseout", function(d) {
                         //change back the color
-                        var dot = d3.select(this);
-                        dot.style("fill", "steelblue")
+                        d3.select(this).style("fill", "steelblue")
                             .attr("r", 3.5);
-                        tooltip3.style("display", "none");
+                        //tooltip3.style("display", "none");
+
 
 
                     })
@@ -563,26 +566,27 @@
                     .attr("cy", function(d) { return y(d.femaleRate); })
                     .on("mouseover", function(d) {
                         //change dot color when mouse hove over
-                        var dot = d3.select(this);
-                        dot.style("fill", "red")
+                        d3.select(this).style("fill", "red")
                             .attr("r", 4.5);
 
                         //show tooltip
-                        tooltip3.style("left", d3.mouse(this)[0] - width)
+                        /*d3.select("#toolTip_vis3")
+                            .style("left", d3.mouse(this)[0] - width)
                             .style("top", d3.mouse(this)[1] - height)
                             .style("display", "inline-block")
                             .style("opacity", .9)
                             .text('' + d.femaleRate);
 
+                        console.log("overwoman");*/
 
 
                     })
                     .on("mouseout", function(d) {
                         //change back the color
-                        var dot = d3.select(this);
-                        dot.style("fill", "orange")
+                        d3.select(this).style("fill", "orange")
                             .attr("r", 3.5);
-                        tooltip3.style("display", "none");
+                        //d3.select("#toolTip_vis3").style("display", "none");
+                        //console.log("outwoman");
 
 
                     })
@@ -683,7 +687,7 @@
                         "Sophomores, Female: Enrolled in DIFFERENT MAJOR (Sph. F)", "Sophomores, Female: Enrolled in SAME MAJOR (Sph. F)"
                     ]
                 ];
-                console.log(fields[0][3]);
+
                 var declareDict = { "End of 1st Year": 0, "End of 2nd Year": 1, "Upon Enrollment": 2, "Other": 3 };
                 var declarFields = ["End of 1st Year", "End of 2nd Year", "Upon Enrollment", "Other"];
                 var count = new Array(4).fill(0),
@@ -711,7 +715,6 @@
                     });
 
                 }
-                console.log(showData);
                 var margin = { top: 20, right: 20, bottom: 30, left: 60 },
                     width = 960 - margin.left - margin.right,
                     height = 500 - margin.top - margin.bottom;
@@ -750,9 +753,17 @@
                     .data(function(d) { return keys.map(function(key) { return { key: key, value: d[key] }; }); })
                     .enter().append("rect")
                     .attr("x", function(d) { return x1(d.key); })
-                    .attr("y", function(d) { return y(d.value); })
+                    .attr("y", function(d) {
+                        if (isNaN(d.value)) return y(0.5);
+                        else
+                            return y(d.value);
+                    })
                     .attr("width", x1.bandwidth())
-                    .attr("height", function(d) { return height - y(d.value); })
+                    .attr("height", function(d) {
+                        if (isNaN(d.value)) return height - y(0.5);
+                        else
+                            return height - y(d.value);
+                    })
                     .attr("fill", function(d) { return z(d.key); });
 
                 svg.append("g")
