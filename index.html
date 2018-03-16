@@ -2,15 +2,25 @@
 
 <head>
     <title>Project 2</title>
-    <link rel="stylesheet" type="text/css" href="project1.css"></link>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="project2.css"></link>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
 </head>
 
 <body>
-    <div id="Vis1">
+<nav class="navbar navbar-inverse navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <p class="navbar-brand" href="#">Project2</p>
+      <a class="navbar-brand" href="#Vis1">Vis1</a>
+      <a class="navbar-brand" href="#Vis2">Vis2</a>
+    </div>
+  </div>
+</nav>
+<div class="w3-content" style="max-width:2000px;margin-top:70px">
+    <div class="title" id="Vis1">
         <h1>Visualization 1: </h1>
-        <br>
         <h2>Relationship between High School Scores and GPA</h2>
         <br>
         <select id="gender">
@@ -22,43 +32,56 @@
             <option value="1">ACT Math</option>
             <option value="2">HSGPA</option>
         </select>
+        <button id="compare_btn" type="button" class="btn btn-default">Compare with Female</button>
         <br>
-        <div id="vis1_plot">
+        <div class="row">
+            <div id="vis1_plot" class="column left"></div>
+            <h2 > Correlation </h2>
+            <div id="vis1_cor" class="column right"></div>
         </div>
     </div>
-    <div id="Vis2">
+    <div class="title" id="Vis2">
         <h1>Visualization 2: </h1>
-        <br>
         <h2>Female and Male GPA Difference in Institution w/ Extentsion Service or w/o Extentsion Service</h2>
         <div id="vis2_plot">
         </div>
     </div>
+</div>
     <script>
+    //Vis1
     vis1(0, 0)
     var xfactor_select = document.getElementById("x_factor");
     var gender_select = document.getElementById("gender");
+
     xfactor_select.addEventListener("change", function(d) {
         // add an event listener to trigger the polt changes
-        vis1(xfactor_select.value, gender_select.value)
+        vis1(xfactor_select.value, gender_select.value);
     });
     gender_select.addEventListener("change", function(d) {
         // add an event listener to trigger the polt changes
-        vis1(xfactor_select.value, gender_select.value)
+        vis1(xfactor_select.value, gender_select.value);
+        (gender_select.value == 0 ) ? $("#compare_btn").text("Compare with Female") : $("#compare_btn").text("Compare with Male");
     });
 
     function vis1(xfactor, gender) {
         var div = document.getElementById('vis1_plot');
-        while (div.firstChild) {
+        while (div.firstChild ) {
             div.removeChild(div.firstChild);
+        }
+        var div2 = document.getElementById('vis1_cor');
+        while (div2.firstChild ) {
+            div2.removeChild(div2.firstChild);
         }
         var fields = [
             ['Enroll, Male: Avg. SAT Math Score (Enrl M)', 'Enroll, Male: Avg. ACT Math Score (Enrl M)', 'Enroll, Male: Average HS GPA (Enrl M)'],
             ['Enroll, Female: Avg. SAT Math Score (Enrl F)', 'Enroll, Female: Avg. ACT Math Score (Enrl F)', 'Enroll, Female: Average HS GPA (Enrl F)']
         ];
         var gpas = ['Freshmen, Male: Cumulative GPA (Fshm M)', 'Freshmen, Female: Cumulative GPA (Fshm F)'];
+        var range = [[300, 1000], [10, 40], [2,5]];
+        var xfactor_title = ["SAT", "ACT Math", "HSGPA"];
         var margin = { top: 20, right: 20, bottom: 30, left: 40 },
-            width = 960 - margin.left - margin.right,
-            height = 500 - margin.top - margin.bottom;
+            width = 760 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
 
         var xValue = function(d) { return parseFloat(d[fields[gender][xfactor]]); }, // data -> value
             xScale = d3.scaleLinear().range([0, width]);
@@ -73,6 +96,16 @@
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+        var tooltip = d3.select("#vis1_plot").append("div")
+                        .attr("id", "toolTip");
+        tooltip.style("position", "relative")
+                .style("height", "auto")
+                .style("font-size", "14")
+                .style("background", "lightsteelblue")
+                .style("padding", "5px")
+                .style("border-radius", "8px")
+                .style("opacity", 0);
+
         //load proper data file based on the selection
         d3.csv("/data/ACT_SAT_HS_FreshmenGPA.csv", function(data) {
 
@@ -81,14 +114,10 @@
             var ymax = d3.max(data, function(d) { return parseFloat(d[gpas[gender]]); });
             var ymin = d3.min(data, function(d) { return parseFloat(d[gpas[gender]]); });
 
-            xScale.domain([xmin, xmax]);
-            yScale.domain([ymin, ymax]);
+            xScale.domain([range[xfactor][0], range[xfactor][1]]);
+            yScale.domain([1, 4]);
 
             data.sort(function(a, b) { return a[fields[gender][xfactor]] - b[fields[gender][xfactor]] });
-
-
-            var tooltip = d3.select("#vis1_plot").append("div").attr("id", "toolTip");
-            tooltip.style("position", "relative").style("height", "auto").style("font-size", "14");
 
             // draw dots
             svg.selectAll(".dot")
@@ -99,8 +128,9 @@
                 .attr("r", 3.5)
                 .attr("cx", function(d) { return xScale(d[fields[gender][xfactor]]); })
                 .attr("cy", function(d) { return yScale(d[gpas[gender]]); })
+                .style("opacity", .9)
                 .on("mouseover", function(d) {
-                    //change dot color when mouse hove over 
+                    //change dot color when mouse hove over
                     var dot = d3.select(this);
                     dot.style('fill', 'red')
                         .attr('r', 4);
@@ -110,19 +140,17 @@
                         .style("left", d3.mouse(this)[0] - width)
                         .style("top", d3.mouse(this)[1] - height)
                         .style("display", "inline-block")
-                        .text("(" + d[fields[gender][xfactor]] + "," + d[gpas[gender]] + ")");
-
-
+                        .html(`${xfactor_title[xfactor]}: ${d[fields[gender][xfactor]]}</br> GPA: ${d[gpas[gender]]}`)
+                        .style("opacity", .9);
                 })
                 .on("mouseout", function(d) {
                     //change back the color
                     var dot = d3.select(this);
-                    dot.style('fill', 'black')
+                    dot.style('fill', 'DarkSlateBlue')
                         .attr('r', 3.5);
                     //hide tooltip
                     d3.select("#tooltip").style("display", "none");
                 });
-
             //draw x-axis
             svg.append("g")
                 .attr("transform", "translate(0," + height + ")")
@@ -131,8 +159,8 @@
             svg.append("text")
                 .attr("class", "label")
                 .text(xfactor_select.options[xfactor_select.selectedIndex].text)
-                .attr("x", width - 10)
-                .attr("y", height - 5);
+                .attr("x", width/2)
+                .attr("y", height + 30);
 
             //draw y-axis
             svg.append("g")
@@ -143,8 +171,6 @@
                 .text("GPA")
                 .attr("x", 5)
                 .attr("y", -5);
-
-
 
             var x = data.map(function(d) { return parseFloat(d[fields[gender][xfactor]]); });
             var y = data.map(function(d) { return parseFloat(d[gpas[gender]]); });
@@ -157,15 +183,27 @@
             var ymin = d3.min(data, function(d) { return parseFloat(d[gpas[gender]]); });
 
             svg.append("line")
+                .attr("id", "mainLine")
                 .attr("x1", xScale(0))
                 .attr("y1", yScale(lr.intercept))
                 .attr("x2", xScale(xmax))
                 .attr("y2", yScale((xmax * lr.slope) + lr.intercept))
-                .style("stroke", "blue");
+                .attr("class", "mainline");
 
-
-            //var lg = calcLinear(data, fields[gender][xfactor], gpas[gender], d3.min(data, function(d) { return parseFloat(d[fields[gender][xfactor]]) }), d3.min(data, function(d) { return parseFloat(d[gpas[gender]])  }));
-
+            $("#compare_btn").click(function() {
+                var _x = data.map(function(d) { return parseFloat(d[fields[1-gender][xfactor]]); });
+                var _y = data.map(function(d) { return parseFloat(d[gpas[1-gender]]); });
+                var _xmax = d3.max(data, function(d) { return parseFloat(d[fields[1-gender][xfactor]]); });
+                var _lr = linearRegression(_x, _y);
+                svg.append("line")
+                    .attr("id", "subLine")
+                    .attr("x1", xScale(0))
+                    .attr("y1", yScale(_lr.intercept))
+                    .attr("x2", xScale(_xmax))
+                    .attr("y2", yScale((_xmax * _lr.slope) + _lr.intercept))
+                    .attr("class", "subline");
+            });
+            correlation(lr, xfactor_title[xfactor]);
         });
     }
 
@@ -189,10 +227,36 @@
         return lr;
     };
 
+    function correlation(lr, field) {
+        var margin = { top: 20, right: 20, bottom: 20, left: 20 },
+            width = 400 - margin.left - margin.right,
+            height = 400 - margin.top - margin.bottom;
+
+        var svg = d3.select("#vis1_cor").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+        svg.append('circle').attr('cx', 100).attr('cy', 100).attr('r', 80)
+                .style("fill", "MidnightBlue").style("opacity", "0.7");
+        var minValue = 0.0011934690661702385;
+        var maxValue = 0.6857280066121653;
+        var new_v = (lr.slope - minValue) / (maxValue - minValue) * 100 + 20;
+        console.log(new_v);
+        var y = 260 - new_v;
+        svg.append('circle').attr('cx', 100).attr('cy', y).attr('r', 80)
+                .style("fill", "LightSkyBlue").style("opacity", "0.7");
+
+        svg.append("text")
+                .attr("x", 200).attr("y", 100)
+        	    .text("GPA");
+        svg.append("text")
+                .attr("x", 200).attr("y", y)
+        	    .text(field);
+
+    }
+    //Vis2
     vis2();
 
     function vis2() {
-
         var margin = { top: 20, right: 20, bottom: 30, left: 60 },
             width = 960 - margin.left - margin.right,
             height = 500 - margin.top - margin.bottom;
@@ -236,7 +300,6 @@
             console.log(x("With Extension Service"));
             console.log(x("Without Extension Service"));
 
-
             //x.domain(showData.map(function(d) { return d.label; }));
             y.domain(d3.extent(showData, function(d) {
                 return d.value;
@@ -252,7 +315,6 @@
                     } else {
                         return "bar positive";
                     }
-
                 })
                 .attr("y", function(d) {
 
@@ -261,7 +323,6 @@
                     } else {
                         return y(0);
                     }
-
                 })
                 .attr("x", function(d) {
                     return x(d.label);
@@ -272,21 +333,15 @@
                 })
                 .style("fill", "steelblue")
                 .on("mouseover", function(d) {
-                    //change dot color when mouse hove over 
+                    //change dot color when mouse hove over
                     var bar = d3.select(this);
                     bar.style('fill', 'orange');
-
-
                 })
                 .on("mouseout", function(d) {
                     //change back the color
                     var bar = d3.select(this);
                     bar.style('fill', 'steelblue');
-
-
-
                 });
-
 
             svg.append("g")
                 .call(d3.axisBottom(x))
@@ -294,9 +349,6 @@
 
             svg.append("g")
                 .call(d3.axisLeft(y));
-
-
-
         });
 
     }
