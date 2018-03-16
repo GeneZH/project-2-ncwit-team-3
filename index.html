@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="project1.css"></link>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="d3.legend.js"></script>
 </head>
 
 <body>
@@ -347,8 +348,8 @@
                 var index = yearDict[d["School Year"]];
 
                 yearCount[index]++;
-                maleRate[index] += parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) / (parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) + parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]));
-                femaleRate[index] += parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) / (parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) + parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]));
+                maleRate[index] += parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) / (parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) + parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]));
+                femaleRate[index] += parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) / (parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) + parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]));
             });
             var tooltip3 = d3.select("#vis3_plot").append("div").attr("id", "toolTip_vis3");
             tooltip3.style("position", "relative").style("height", "auto").style("font-size", "14");
@@ -365,9 +366,9 @@
             var x = d3.scaleBand()
                 .domain(showData.map(function(d) { return d.year; }))
                 .range([0, width])
-                .padding(0),
+                .padding(0.13),
 
-                y = d3.scaleLinear().rangeRound([height, 0]).domain([0, 0.5]);
+                y = d3.scaleLinear().rangeRound([height, 0]).domain([0.5, 1]);
 
             function make_x_gridlines() {
                 return d3.axisBottom(x)
@@ -426,7 +427,8 @@
                 .attr("stroke-linejoin", "round")
                 .attr("stroke-linecap", "round")
                 .attr("stroke-width", 1.5)
-                .attr("d", line);
+                .attr("d", line)
+                .attr("data-legend", "Male");
 
             var line = d3.line()
                 .x(function(d) { return x(d.year) + 29.3; })
@@ -474,12 +476,13 @@
                 .attr("stroke-linejoin", "round")
                 .attr("stroke-linecap", "round")
                 .attr("stroke-width", 1.5)
-                .attr("d", line);
+                .attr("d", line)
+                .attr("data-legend", "Female");
 
 
             svg.append("g")
                 .call(d3.axisBottom(x))
-                .attr("transform", "translate(0," + y(0) + ")");
+                .attr("transform", "translate(0," + y(0.5) + ")");
 
             svg.append("g")
                 .call(d3.axisLeft(y));
@@ -505,9 +508,32 @@
                 .attr("stroke", "lightgrey")
                 .attr("stroke-opacity", 0.7);
 
+            var ordinal = d3.scaleOrdinal()
+                .domain(["Male", "Female"])
+                .range(["steelblue", "orange"]);
+
+
+            svg.append("g")
+                .attr("class", "legendOrdinal")
+                .attr("transform", "translate(20,20)");
+
+            var legendOrdinal = d3.legendColor()
+                .shape("path", d3.symbol().type(d3.symbolTriangle).size(150)())
+                .shapePadding(10)
+                //use cellFilter to hide the "e" cell
+                .cellFilter(function(d) { return d.label !== "e" })
+                .scale(ordinal);
+
+            svg.select(".legendOrdinal")
+                .call(legendOrdinal);
+
 
 
         });
+
+    };
+
+    function vis3_detail() {
 
     };
     </script>
