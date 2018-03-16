@@ -6,6 +6,7 @@
     <link rel="stylesheet" type="text/css" href="project2.css"></link>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script src="d3.legend.js"></script>
 </head>
 
 <body>
@@ -15,6 +16,7 @@
       <p class="navbar-brand" href="#">Project2</p>
       <a class="navbar-brand" href="#Vis1">Vis1</a>
       <a class="navbar-brand" href="#Vis2">Vis2</a>
+      <a class="navbar-brand" href="#Vis3">Vis3</a>
     </div>
   </div>
 </nav>
@@ -46,7 +48,12 @@
         <div id="vis2_plot">
         </div>
     </div>
-</div>
+    <div class="title" id="Vis3">
+        <h1>Visualization 3: </h1>
+        <h2>Average Retention</h2>
+        <div id="vis3_plot">
+        </div>
+    </div>
     <script>
     //Vis1
     vis1(0, 0)
@@ -73,8 +80,8 @@
             div2.removeChild(div2.firstChild);
         }
         var fields = [
-            ['Enroll, Male: Avg. SAT Math Score (Enrl M)', 'Enroll, Male: Avg. ACT Math Score (Enrl M)', 'Enroll, Male: Average HS GPA (Enrl M)'],
-            ['Enroll, Female: Avg. SAT Math Score (Enrl F)', 'Enroll, Female: Avg. ACT Math Score (Enrl F)', 'Enroll, Female: Average HS GPA (Enrl F)']
+            ["Enroll, Male: Avg. SAT Math Score (Enrl M)", "Enroll, Male: Avg. ACT Math Score (Enrl M)", "Enroll, Male: Average HS GPA (Enrl M)"],
+            ["Enroll, Female: Avg. SAT Math Score (Enrl F)", "Enroll, Female: Avg. ACT Math Score (Enrl F)", "Enroll, Female: Average HS GPA (Enrl F)"]
         ];
         var gpas = ['Freshmen, Male: Cumulative GPA (Fshm M)', 'Freshmen, Female: Cumulative GPA (Fshm F)'];
         var range = [[300, 1000], [10, 40], [2,5]];
@@ -132,12 +139,11 @@
                 .on("mouseover", function(d) {
                     //change dot color when mouse hove over
                     var dot = d3.select(this);
-                    dot.style('fill', 'red')
-                        .attr('r', 4);
+                    dot.style("fill", "red")
+                        .attr("r", 4);
 
                     //show tooltip
-                    d3.select("#tooltip")
-                        .style("left", d3.mouse(this)[0] - width)
+                    tooltip.style("left", d3.mouse(this)[0] - width)
                         .style("top", d3.mouse(this)[1] - height)
                         .style("display", "inline-block")
                         .html(`${xfactor_title[xfactor]}: ${d[fields[gender][xfactor]]}</br> GPA: ${d[gpas[gender]]}`)
@@ -149,7 +155,7 @@
                     dot.style('fill', 'DarkSlateBlue')
                         .attr('r', 3.5);
                     //hide tooltip
-                    d3.select("#tooltip").style("display", "none");
+                    tooltip.style("display", "none");
                 });
             //draw x-axis
             svg.append("g")
@@ -205,7 +211,7 @@
             });
             correlation(lr, xfactor_title[xfactor]);
         });
-    }
+    };
 
     function linearRegression(x, y) {
         var lr = {};
@@ -221,8 +227,8 @@
             var r = r + rpart;
         }
         var r1 = r / (y.length - 1)
-        lr['slope'] = r1 * (ystd / xstd);
-        lr['intercept'] = ymean - lr.slope * xmean;
+        lr["slope"] = r1 * (ystd / xstd);
+        lr["intercept"] = ymean - lr.slope * xmean;
 
         return lr;
     };
@@ -289,16 +295,12 @@
                 { "label": "Without Extension Service", "value": diff_wo / length_wo }
             ];
 
-            var bandscale = d3.range(1, 3);
             var x = d3.scaleBand()
                 .domain(showData.map(function(d) { return d.label; }))
                 .range([0, width])
                 .padding(0.4),
 
                 y = d3.scaleLinear().rangeRound([height, 0]);
-
-            console.log(x("With Extension Service"));
-            console.log(x("Without Extension Service"));
 
             //x.domain(showData.map(function(d) { return d.label; }));
             y.domain(d3.extent(showData, function(d) {
@@ -335,12 +337,20 @@
                 .on("mouseover", function(d) {
                     //change dot color when mouse hove over
                     var bar = d3.select(this);
-                    bar.style('fill', 'orange');
+                    bar.style("fill", "orange");
+
+
+
+
                 })
                 .on("mouseout", function(d) {
                     //change back the color
                     var bar = d3.select(this);
-                    bar.style('fill', 'steelblue');
+                    bar.style("fill", "steelblue");
+
+
+
+
                 });
 
             svg.append("g")
@@ -351,7 +361,237 @@
                 .call(d3.axisLeft(y));
         });
 
-    }
+    };
+
+
+    vis3();
+
+    function vis3() {
+        var margin = { top: 20, right: 20, bottom: 30, left: 60 },
+            width = 960 - margin.left - margin.right,
+            height = 500 - margin.top - margin.bottom;
+
+        var svg = d3.select("#vis3_plot").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+        d3.csv("/data/Major_changed.csv", function(data) {
+            var yearDict = {
+                "2003-2004": 0,
+                "2004-2005": 1,
+                "2005-2006": 2,
+                "2006-2007": 3,
+                "2007-2008": 4,
+                "2008-2009": 5,
+                "2009-2010": 6,
+                "2010-2011": 7,
+                "2011-2012": 8,
+                "2012-2013": 9,
+                "2013-2014": 10,
+                "2014-2015": 11,
+                "2015-2016": 12
+            };
+            var yearCount = new Array(13).fill(0),
+                maleRate = new Array(13).fill(0),
+                femaleRate = new Array(13).fill(0);
+            data.forEach(function(d) {
+                if ((parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) + parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"])) == 0 || (parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) + parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"])) == 0) {
+                    return;
+                }
+                var index = yearDict[d["School Year"]];
+
+                yearCount[index]++;
+                maleRate[index] += parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]) / (parseFloat(d["Totals, Male: Enrolled in DIFFERENT MAJOR (Tot. M)"]) + parseFloat(d["Totals, Male: Enrolled in SAME MAJOR (Tot. M)"]));
+                femaleRate[index] += parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]) / (parseFloat(d["Totals, Female: Enrolled in DIFFERENT MAJOR (Tot. F)"]) + parseFloat(d["Totals, Female: Enrolled in SAME MAJOR (Tot. F)"]));
+            });
+            var tooltip3 = d3.select("#vis3_plot").append("div").attr("id", "toolTip_vis3");
+            tooltip3.style("position", "relative").style("height", "auto").style("font-size", "14");
+
+            var showData = []
+            for (i = 0; i < 13; i++) {
+                maleRate[i] /= yearCount[i];
+                femaleRate[i] /= yearCount[i];
+                var year = ('' + (i + 2003)) + "-" + ('' + (i + 2004))
+                showData.push({ "year": year, "maleRate": maleRate[i], "femaleRate": femaleRate[i] });
+            }
+
+            console.log(maleRate);
+            var x = d3.scaleBand()
+                .domain(showData.map(function(d) { return d.year; }))
+                .range([0, width])
+                .padding(0.13),
+
+                y = d3.scaleLinear().rangeRound([height, 0]).domain([0.5, 1]);
+
+            function make_x_gridlines() {
+                return d3.axisBottom(x)
+                    .ticks(5)
+            }
+
+            // gridlines in y axis function
+            function make_y_gridlines() {
+                return d3.axisLeft(y)
+                    .ticks(5)
+            }
+
+            // add the X gridlines
+            svg.append("g")
+                .attr("class", "grid")
+                .attr("transform", "translate(0," + height + ")")
+                .call(make_x_gridlines()
+                    .tickSize(-height)
+                    .tickFormat("")
+                )
+                .attr("fill", "none");
+
+            // add the Y gridlines
+            svg.append("g")
+                .attr("class", "grid")
+                .call(make_y_gridlines()
+                    .tickSize(-width)
+                    .tickFormat("")
+                )
+            svg.selectAll(".grid line")
+                .attr("stroke", "lightgrey")
+                .attr("stroke-opacity", 0.7);
+
+            svg.selectAll(".dot")
+                .data(showData)
+                .enter()
+                .append("circle")
+                .attr("class", "male")
+                .attr("r", 3.5)
+                .attr("fill", "steelblue")
+                .attr("cx", function(d) { return x(d.year) + 29.3; })
+                .attr("cy", function(d) { return y(d.maleRate); })
+                .on("mouseover", function(d) {
+                    //change dot color when mouse hove over
+                    var dot = d3.select(this);
+                    dot.style("fill", "red")
+                        .attr("r", 4.5);
+
+                    //show tooltip
+                    tooltip3.style("left", d3.mouse(this)[0] - width)
+                        .style("top", d3.mouse(this)[1] - height)
+                        .style("display", "inline-block")
+                        .text('' + d.maleRate);
+
+
+
+                })
+                .on("mouseout", function(d) {
+                    //change back the color
+                    var dot = d3.select(this);
+                    dot.style("fill", "steelblue")
+                        .attr("r", 3.5);
+                    tooltip3.style("display", "none");
+
+
+                });
+
+            var line = d3.line()
+                .x(function(d) { return x(d.year) + 29.3; })
+                .y(function(d) { return y(d.maleRate); });
+
+            svg.append("path")
+                .datum(showData)
+                .attr("fill", "none")
+                .attr("stroke", "steelblue")
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-linecap", "round")
+                .attr("stroke-width", 1.5)
+                .attr("d", line)
+                .attr("data-legend", "Male");
+
+            var line = d3.line()
+                .x(function(d) { return x(d.year) + 29.3; })
+                .y(function(d) { return y(d.femaleRate); });
+
+            svg.selectAll(".dot")
+                .data(showData)
+                .enter()
+                .append("circle")
+                .attr("class", "female")
+                .attr("r", 3.5)
+                .attr("fill", "orange")
+                .attr("cx", function(d) { return x(d.year) + 29.3; })
+                .attr("cy", function(d) { return y(d.femaleRate); })
+                .on("mouseover", function(d) {
+                    //change dot color when mouse hove over
+                    var dot = d3.select(this);
+                    dot.style("fill", "red")
+                        .attr("r", 4.5);
+
+                    //show tooltip
+                    tooltip3.style("left", d3.mouse(this)[0] - width)
+                        .style("top", d3.mouse(this)[1] - height)
+                        .style("display", "inline-block")
+                        .text('' + d.femaleRate);
+
+
+
+                })
+                .on("mouseout", function(d) {
+                    //change back the color
+                    var dot = d3.select(this);
+                    dot.style("fill", "orange")
+                        .attr("r", 3.5);
+                    tooltip3.style("display", "none");
+
+
+                });
+
+
+            svg.append("path")
+                .datum(showData)
+                .attr("fill", "none")
+                .attr("stroke", "orange")
+                .attr("stroke-linejoin", "round")
+                .attr("stroke-linecap", "round")
+                .attr("stroke-width", 1.5)
+                .attr("d", line)
+                .attr("data-legend", "Female");
+
+
+            svg.append("g")
+                .call(d3.axisBottom(x))
+                .attr("transform", "translate(0," + y(0.5) + ")");
+
+            svg.append("g")
+                .call(d3.axisLeft(y));
+
+            var ordinal = d3.scaleOrdinal()
+                .domain(["Male", "Female"])
+                .range(["steelblue", "orange"]);
+
+
+            svg.append("g")
+                .attr("class", "legendOrdinal")
+                .attr("transform", "translate(20,20)");
+
+            var legendOrdinal = d3.legendColor()
+                .shape("path", d3.symbol().type(d3.symbolTriangle).size(150)())
+                .shapePadding(10)
+                //use cellFilter to hide the "e" cell
+                .cellFilter(function(d) { return d.label !== "e" })
+                .scale(ordinal);
+
+            svg.select(".legendOrdinal")
+                .call(legendOrdinal);
+
+
+
+        });
+
+    };
+
+    function vis3_detail() {
+
+    };
     </script>
 </body>
 
