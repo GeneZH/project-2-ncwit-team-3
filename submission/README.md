@@ -49,7 +49,7 @@ Chih-Wei adds the animation and interaction on top of Yuhan's work to perform in
 
 ### How to run it?
 
-- Run on the local machine using python3:
+- Under the submission directory, start a local server using python 3:
 
     ```bash
     $ python3 -m http.server <port number>
@@ -72,5 +72,5 @@ Chih-Wei adds the animation and interaction on top of Yuhan's work to perform in
 - Open the browser and go to:
 
     ```
-    http://localhost:<port number>/index.html
+    http://localhost:<port number>
     ```
