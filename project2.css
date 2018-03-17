@@ -1,15 +1,16 @@
 body,html{
     height: 100%;
-    font-family: "Inconsolata", sans-serif;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    background-color: #F5F3EE;
 }
 h1 {
-    font-family: 'Inconsolata', arial, serif;
+    font-family: "Comic Sans MS", cursive, sans-serif;
     line-height: 1.25;
     font-size: 24px;
     font-weight: bold;
 }
 h2 {
-    font-family: 'Inconsolata', arial, serif;
+    font-family: "Comic Sans MS", cursive, sans-serif;
     line-height: 1.25;
     font-size:18px;
 }

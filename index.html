@@ -25,15 +25,19 @@
             <h1>Visualization 1: </h1>
             <h2>Relationship between High School Scores and GPA</h2>
             <br>
-            <select id="gender">
-                <option value="0">Male</option>
-                <option value="1">Female</option>
-            </select>
-            <select id="x_factor">
-                <option value="0">SAT</option>
-                <option value="1">ACT Math</option>
-                <option value="2">HSGPA</option>
-            </select>
+            <div class="col-xs-2">
+              <select id="gender" class="form-control">
+                  <option value="0">Male</option>
+                  <option value="1">Female</option>
+              </select>
+            </div>
+            <div class="col-xs-2">
+              <select id="x_factor" class="form-control">
+                  <option value="0">SAT</option>
+                  <option value="1">ACT Math</option>
+                  <option value="2">HSGPA</option>
+              </select>
+            </div>
             <button id="compare_btn" type="button" class="btn btn-default">Compare with Female</button>
             <br>
             <div class="row">
@@ -51,6 +55,7 @@
         <div class="title" id="Vis3">
             <h1>Visualization 3: </h1>
             <h2>Average Retention</h2>
+            <p>Click on a dot to see details</p>
             <div id="vis3_plot">
             </div>
             <div id="vis3_detail">
