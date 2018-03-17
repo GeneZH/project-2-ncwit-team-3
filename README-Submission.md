@@ -14,13 +14,13 @@ We used **scatterplot** with a linear regression line to show the correlation be
 
 Since NCWIT provides Extension Service to help institution on student retention, we would like to know the relationship of student GPA in an institution that is with or without the extension service. Suppose that GPA is a feature that impact students' willingness of staying, we want to explore how well female and male students perform on their studies in institutions with Extension Service support, comparing to those without ES support.
 
-We used **bar chart** to visualize the data because it could easily tell the difference between two condition by the height difference. We encountered some difficulty in visualizing this concept due to the lack of dataset.
+We used **bar chart** to visualize the data because it could easily tell the difference between two condition by the height difference. We encountered some difficulty in visualizing this concept due to the lack of dataset. The y axis is the difference between female GPA and male GPA. According to the result, students have lower GPA difference and it is positive, which means most of female students GPA are high, in the institution with Extension Service consulting.
 
 **3. How does student retention rate go from year to year?**
 
 Student retention rate is one of the most important thing that every university cares about. Plotting the retention rate of every year can evaluate the programs/schools policy on retaining students. We calculated the retention ratio by subtracting the total student number in this year from that in the next year, and then average the difference among 4 years.
 
-Since it is a temporal data, we chose **line chart** to visualize this trend so that we can see the change of the retention rate.
+Since it is a temporal data, we chose **line chart** to visualize this trend so that we can see the change of the retention rate. We can see that in average, female students have lower retention rate than male students. The interesting thing is that, after 2008, female's retention rate grows largely and close to male's retention rate. To show more details, we visualize the details by clicking on the dots. You can know retention rate of Freshman, Sophomores and others, under the condition of different time that major has been selected.
 
 ---
 
