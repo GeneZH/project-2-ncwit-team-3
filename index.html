@@ -61,6 +61,12 @@
                 </div>
             </div>
         </div>
+        <div class="title" id="Vis4">
+            <h1>Visualization 4: </h1>
+            <h2>Race Distrubution</h2>
+            <div id="vis4_plot">
+            </div>
+        </div>
         <script>
         //Vis1
         vis1(0, 0)
@@ -735,8 +741,7 @@
                 var y = d3.scaleLinear()
                     .rangeRound([height, 0]);
 
-                var z = d3.scaleOrdinal()
-                    .range(["#F16A70", "#B1D877", "#8CDCDA", "#4D4D4D"]);
+                var z = d3.scaleOrdinal(d3.schemeCategory10);
 
                 var keys = ["totalRetention", "freshmenRetention", "sophomoresRates", "otherRates"];
 
@@ -781,7 +786,7 @@
 
                 var ordinal = d3.scaleOrdinal()
                     .domain(["Total", "Freshmen", "Sophomores", "Other"])
-                    .range(["#F16A70", "#B1D877", "#8CDCDA", "#4D4D4D"]);
+                    .range(d3.schemeCategory10);
 
                 //legend
                 svg.append("g")
@@ -803,6 +808,218 @@
 
 
         };
+        vis4();
+
+        function vis4() {
+            d3.csv("/data/race_total_no_missing.csv", function(data) {
+                var yearDict = {
+                    "2003-2004": 0,
+                    "2004-2005": 1,
+                    "2005-2006": 2,
+                    "2006-2007": 3,
+                    "2007-2008": 4,
+                    "2008-2009": 5,
+                    "2009-2010": 6,
+                    "2010-2011": 7,
+                    "2011-2012": 8,
+                    "2012-2013": 9,
+                    "2013-2014": 10,
+                    "2014-2015": 11,
+                    "2015-2016": 12
+                };
+                var total = [Array(13).fill(0), Array(13).fill(0)],
+                    asian = [Array(13).fill(0), Array(13).fill(0)],
+                    black = [Array(13).fill(0), Array(13).fill(0)],
+                    hispanics = [Array(13).fill(0), Array(13).fill(0)],
+                    hawaiian = [Array(13).fill(0), Array(13).fill(0)],
+                    twomore = [Array(13).fill(0), Array(13).fill(0)],
+                    white = [Array(13).fill(0), Array(13).fill(0)];
+
+                data.forEach(function(d) {
+                    var index = yearDict[d["School Year"]];
+                    asian[0][index] += parseFloat(d["Totals, Male: Asian (Tot. M)"]);
+                    asian[1][index] += parseFloat(d["Totals, Female: Asian (Tot. F)"]);
+                    black[0][index] += parseFloat(d["Totals, Male: Black/African American (Tot. M)"]);
+                    black[1][index] += parseFloat(d["Totals, Female: Black/African American (Tot. F)"]);
+                    hispanics[0][index] += parseFloat(d["Totals, Male: Hispanics of any race (Tot. M)"]);
+                    hispanics[1][index] += parseFloat(d["Totals, Female: Hispanics of any race (Tot. F)"]);
+                    hawaiian[0][index] += parseFloat(d["Totals, Male: Native Hawaiian/Other Pacific Islander (Tot. M)"]);
+                    hawaiian[1][index] += parseFloat(d["Totals, Female: Native Hawaiian/Other Pacific Islander (Tot. F)"]);
+                    twomore[0][index] += parseFloat(d["Totals, Male: Two or more races (Tot. M)"]);
+                    twomore[1][index] += parseFloat(d["Totals, Female: Two or more races (Tot. F)"]);
+                    white[0][index] += parseFloat(d["Totals, Male: White (Tot. M)"]);
+                    white[1][index] += parseFloat(d["Totals, Female: White (Tot. F)"]);
+                });
+                console.log(asian);
+
+                var yearData = [],
+                    genderData = [],
+                    raceData = [];
+                for (i = 0; i < 13; i++) {
+                    var year = ('' + (i + 2003)) + "-" + ('' + (i + 2004));
+                    var maletotal = asian[0][i] + black[0][i] + hispanics[0][i] + hawaiian[0][i] + twomore[0][i] + hispanics[0][i],
+                        femaletotal = asian[1][i] + black[1][i] + hispanics[1][i] + hawaiian[1][i] + twomore[1][i] + hispanics[1][i];
+
+                    yearData.push({
+                        "year": year,
+                        "value": maletotal + femaletotal
+                    });
+                    genderData.push({
+                        "year": year,
+                        "male": maletotal,
+                        "female": femaletotal
+                    });
+                    raceData.push([
+                        { "race": "Asian", "value": asian[0][i] + asian[1][i] },
+                        { "race": "Black", "value": black[0][i] + black[1][i] },
+                        { "race": "Hispanics", "value": hispanics[0][i] + hispanics[1][i] },
+                        { "race": "Hawaiian", "value": hawaiian[0][i] + hawaiian[1][i] },
+                        { "race": "Two or More Races", "value": twomore[0][i] + twomore[1][i] },
+                        { "race": "Whte", "value": white[0][i] + white[1][i] }
+                    ]);
+                }
+                console.log(raceData);
+
+                var margin = { top: 20, right: 20, bottom: 30, left: 0 },
+                    width = 480 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+
+                var svg = d3.select("#vis4_plot").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", 'translate(' + (width / 2 + 50) +
+                        ',' + (height / 2) + ')');
+
+                var radius = Math.min(width, height) / 2;
+
+                var pie = d3.pie()
+                    .value(function(d) { return d.value; })
+                    .sort(null);
+
+                // contructs and arc generator. This will be used for the donut. The difference between outer and inner
+                // radius will dictate the thickness of the donut
+                var arc = d3.arc()
+                    .outerRadius(radius * 0.8)
+                    .innerRadius(radius * 0.6);
+
+
+                var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+                var path = svg
+                    .selectAll('path')
+                    .data(pie(yearData))
+                    .enter().append('path')
+                    .attr("class", "arc")
+                    .attr('fill', function(d) { return color(d.data.year); })
+                    .attr('d', arc)
+                    .attr("year", function(d) { return d.data.year; })
+                    .attr("clicked", false)
+                    .style("opacity", 0.4)
+                    .on("mouseover", function(d) {
+                        d3.select(this)
+                            .style("opacity", 1.0);
+                    })
+                    .on("mouseout", function(d) {
+                        var arcpart = d3.select(this);
+                        if (arcpart.attr("clicked") == "yes") {
+
+                        } else {
+                            arcpart.style("opacity", 0.4);
+                        }
+                    })
+                    .on("click", function(d) {
+                        svg.selectAll('.arc')
+                            .style("opacity", 0.4)
+                            .attr("clicked", "no")
+                            .attr('d', arc);
+
+                        var bigarc = d3.arc()
+                            .outerRadius(radius * 0.87)
+                            .innerRadius(radius * 0.67);
+
+                        d3.select(this)
+                            .style("opacity", 1.0)
+                            .attr("clicked", "yes")
+                            .attr('d', bigarc);
+
+                        if ($('#raceChart').length) {
+                            $('#raceChart').fadeOut(500);
+                            document.getElementById("raceChart").outerHTML = '';
+                        }
+
+                        var svg2 = d3.select("#vis4_plot").append("svg")
+                            .attr("width", width + margin.left + margin.right + 100)
+                            .attr("height", height + margin.top + margin.bottom)
+                            .attr("id", "raceChart")
+                            .append("g")
+                            .attr("transform", 'translate(' + (width / 2 + 150) +
+                                ',' + (height / 2) + ')');
+                        var raceColor = d3.scaleOrdinal().range(["yellow", "black", "Grey", "Blue", "Green", "Red"])
+
+                        var path = svg2
+                            .selectAll('path')
+                            .data(pie(raceData[yearDict[d3.select(this).attr("year")]]))
+                            .enter().append('path')
+                            .attr("class", "arc")
+                            .attr('fill', function(d) { return raceColor(d.data.race); })
+                            .attr('d', arc)
+                            .attr("clicked", false)
+                            .style("opacity", 0.7)
+                            .on("mouseover", function(d) {
+                                d3.select(this)
+                                    .style("opacity", 1.0);
+                            })
+                            .on("mouseout", function(d) {
+                                d3.select(this)
+                                    .style("opacity", 0.7);
+                            })
+                        var ordinal2 = d3.scaleOrdinal()
+                            .domain(["Asian","Black","Hispanics","Hawaiian","Two or More Races","White"])
+                            .range(raceColor.range());
+
+                        //legend
+                        svg2.append("g")
+                            .attr("class", "legendOrdinal")
+                            .attr("transform", "translate(-270,-200)");
+
+                        var legendOrdinal2 = d3.legendColor()
+                            .shape("path", d3.symbol().type(d3.symbolSquare).size(150)())
+                            .shapePadding(10)
+                            //use cellFilter to hide the "e" cell
+                            .cellFilter(function(d) { return d.label !== "e" })
+                            .scale(ordinal2);
+
+                        svg2.select(".legendOrdinal")
+                            .call(legendOrdinal2);
+                        $('#raceChart').fadeOut(0);
+                        $('#raceChart').fadeIn(500);
+
+                    });
+
+                var ordinal = d3.scaleOrdinal()
+                    .domain(Object.keys(yearDict))
+                    .range(d3.schemeCategory20);
+
+                //legend
+                svg.append("g")
+                    .attr("class", "legendOrdinal")
+                    .attr("transform", "translate(-270,-200)");
+
+                var legendOrdinal = d3.legendColor()
+                    .shape("path", d3.symbol().type(d3.symbolSquare).size(150)())
+                    .shapePadding(10)
+                    //use cellFilter to hide the "e" cell
+                    .cellFilter(function(d) { return d.label !== "e" })
+                    .scale(ordinal);
+
+                svg.select(".legendOrdinal")
+                    .call(legendOrdinal);
+
+
+            });
+
+        }
         </script>
 </body>
 
