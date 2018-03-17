@@ -2,7 +2,7 @@
 
 <head>
     <title>Project 2</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"></link>
     <link rel="stylesheet" type="text/css" href="project2.css"></link>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
     <script src="https://d3js.org/d3.v4.min.js"></script>
@@ -13,11 +13,11 @@
     <nav class="navbar navbar-inverse navbar-fixed-top">
         <div class="container-fluid">
             <div class="navbar-header">
-                <p class="navbar-brand" href="#">Project2</p>
-                <a class="navbar-brand" href="#Vis1">Vis1</a>
-                <a class="navbar-brand" href="#Vis2">Vis2</a>
-                <a class="navbar-brand" href="#Vis3">Vis3</a>
-                <a class="navbar-brand" href="#Vis4">Vis4</a>
+                <p class="navbar-brand" href="#">Project 2</p>
+                <a class="navbar-brand" href="#Vis1">GPA and SAT/ACT/HSGPA</a>
+                <a class="navbar-brand" href="#Vis2">Race Distribution</a>
+                <a class="navbar-brand" href="#Vis3">Retention</a>
+                <a class="navbar-brand" href="#Vis4">GPA Difference</a>
             </div>
         </div>
     </nav>
@@ -27,17 +27,17 @@
             <h2>Relationship between High School Scores and GPA</h2>
             <br>
             <div class="col-xs-2">
-              <select id="gender" class="form-control">
-                  <option value="0">Male</option>
-                  <option value="1">Female</option>
-              </select>
+                <select id="gender" class="form-control">
+                    <option value="0">Male</option>
+                    <option value="1">Female</option>
+                </select>
             </div>
             <div class="col-xs-2">
-              <select id="x_factor" class="form-control">
-                  <option value="0">SAT</option>
-                  <option value="1">ACT Math</option>
-                  <option value="2">HSGPA</option>
-              </select>
+                <select id="x_factor" class="form-control">
+                    <option value="0">SAT</option>
+                    <option value="1">ACT Math</option>
+                    <option value="2">HSGPA</option>
+                </select>
             </div>
             <button id="compare_btn" type="button" class="btn btn-default">Compare with Female</button>
             <br>
@@ -68,13 +68,19 @@
                 </div>
             </div>
         </div>
-
-                <div class="title" id="Vis4">
+        <div class="title" id="Vis4">
             <h1>Visualization 4: </h1>
             <h2>Female and Male GPA Difference in Institution w/ Extentsion Service or w/o Extentsion Service</h2>
             <div id="vis2_plot">
             </div>
         </div>
+        <footer class="navbar navbar-inverse navbar-static-bottom">
+            <center class="navbar-brand">Team 3:</center>
+            <center class="navbar-brand">Chih-Wei Lin</center>
+            <center class="navbar-brand">Yijun  Zhang</center>
+            <center class="navbar-brand">Yuhan Lin</center>
+
+        </footer>
         <script>
         //Vis1
         vis1(0, 0)
@@ -983,7 +989,7 @@
                                     .style("opacity", 0.7);
                             })
                         var ordinal2 = d3.scaleOrdinal()
-                            .domain(["Asian","Black","Hispanics","Hawaiian","Two or More Races","White"])
+                            .domain(["Asian", "Black", "Hispanics", "Hawaiian", "Two or More Races", "White"])
                             .range(raceColor.range());
 
                         //legend
